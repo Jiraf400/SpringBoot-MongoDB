@@ -7,16 +7,16 @@ import org.bson.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.sun.tools.javac.util.StringUtils.toLowerCase;
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.springframework.data.domain.Sort.Direction.DESC;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.ROOT;
 import static org.springframework.data.support.PageableExecutionUtils.getPage;
 
 @Service
@@ -81,8 +81,22 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public List<Document> getOldestPersonByCity() {
-        return null;
+    public List<Document> getOldestPersonByCity(String city) {
+
+        UnwindOperation unwindOperation
+                = Aggregation.unwind("addresses");      //unwrap addresses list
+        SortOperation sortOperation
+                = Aggregation.sort(DESC, "age");    //sort persons by age
+        GroupOperation groupOperation
+                = Aggregation.group("addresses.city")   //group cities
+                .first(ROOT)
+                .as("oldestPerson");    //store as oldestPerson
+
+        Aggregation aggregation
+                = Aggregation.newAggregation(unwindOperation, sortOperation, groupOperation);
+
+        // List<Document> person
+        return mongoTemplate.aggregate(aggregation, Person.class, Document.class).getMappedResults();
     }
 
     @Override

@@ -54,12 +54,12 @@ public class PersonController {
                 = PageRequest.of(page,size);
         return personService.search(name,minAge,maxAge,city,pageable);
     }
-//
-//    @GetMapping("/oldestPerson")
-//    public List<Document> getOldestPerson() {
-//        return personService.getOldestPersonByCity();
-//    }
-//
+
+    @GetMapping("/oldestPerson/{city}")
+    public List<Document> getOldestPerson(@PathVariable String city) {
+        return personService.getOldestPersonByCity(city);
+    }
+
 //    @GetMapping("/populationByCity")
 //    public List<Document> getPopulationByCity() {
 //        return personService.getPopulationByCity();

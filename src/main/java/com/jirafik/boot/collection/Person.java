@@ -11,6 +11,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "person")
 @JsonInclude(NON_NULL)
 public class Person {
