@@ -24,7 +24,6 @@ public class PersonController {
         return personService.save(person);
     }
 
-
     @GetMapping
     public List<Person> getPersonByName(@RequestParam("name") String name) {
         return personService.getPersonByName(name);
@@ -51,8 +50,8 @@ public class PersonController {
             @RequestParam(defaultValue = "5") Integer size      //number of items on page
     ) {
         Pageable pageable
-                = PageRequest.of(page,size);
-        return personService.search(name,minAge,maxAge,city,pageable);
+                = PageRequest.of(page, size);
+        return personService.search(name, minAge, maxAge, city, pageable);
     }
 
     @GetMapping("/oldestPerson/{city}")
@@ -60,8 +59,8 @@ public class PersonController {
         return personService.getOldestPersonByCity(city);
     }
 
-//    @GetMapping("/populationByCity")
-//    public List<Document> getPopulationByCity() {
-//        return personService.getPopulationByCity();
-//    }
+    @GetMapping("/populationByCity")
+    public List<Document> getPopulationByCity() {
+        return personService.getPopulationByCity();
+    }
 }

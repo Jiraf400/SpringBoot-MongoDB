@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -34,6 +35,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public List<Person> getPersonByName(String name) {
+
         List<Person> personList1 = new ArrayList<>();
         for (Person p : repository.findAll()) {
             if (p.getUsername().equalsIgnoreCase(name)) personList1.add(p);
@@ -59,7 +61,7 @@ public class PersonServiceImpl implements PersonService {
         Query query = new Query().with(pageable);
         List<Criteria> criteria = new ArrayList<>();
 
-        if (name != null && !name.isEmpty()) {
+        if (name != null && !name.isEmpty()) {            //contains name ignore cases
             criteria.add(Criteria.where("username").regex(name, "i"));
         }
 
@@ -101,6 +103,27 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public List<Document> getPopulationByCity() {
-        return null;
+
+        UnwindOperation unwindOperation
+                = Aggregation.unwind("addresses");
+        GroupOperation groupOperation
+                = Aggregation.group("addresses.city")
+                .count().as("popCount");
+        SortOperation sortOperation
+                = Aggregation.sort(Sort.Direction.DESC, "popCount");
+
+        ProjectionOperation projectionOperation
+                = Aggregation.project()
+                .andExpression("_id").as("city")
+                .andExpression("popCount").as("count")
+                .andExclude("_id");
+
+        Aggregation aggregation
+                = Aggregation.newAggregation(unwindOperation,groupOperation,sortOperation,projectionOperation);
+
+                //List<Document>;;
+        return  mongoTemplate.aggregate(aggregation,
+                Person.class,
+                Document.class).getMappedResults();
     }
 }
